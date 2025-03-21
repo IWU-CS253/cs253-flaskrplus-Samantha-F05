@@ -69,6 +69,7 @@ def show_entries():
     """Shows all entries, optionally filtered by category, with
     a category selection interface and add post interface above.
     """
+    print("showing entries")
     db = get_db()
 
     # Filter view if category specified in query string
@@ -105,4 +106,26 @@ def delete_entry():
     db.execute('DELETE FROM entries WHERE id=?', [request.form['id']])
     db.commit()
     flash('Entry deleted')
+    return redirect(url_for('show_entries'))
+
+
+@app.route('/edit', methods=['POST'])
+def set_up_edit():
+    db = get_db()
+    cur = db.execute('SELECT * FROM entries WHERE id=?', [request.form['id']])
+    entries = cur.fetchall()
+
+
+    return render_template('edit.html', entries=entries)
+
+
+@app.route('/place', methods=['POST'])
+def edit_entry():
+    print("made it")
+    db = get_db()
+    db.execute('UPDATE entries SET title=?, category=?, text=? WHERE id=?',
+               [request.form['title'], request.form['category'], request.form['text'], request.form['id']])
+    db.commit()
+    flash('Entry was successfully edited')
+    print("redirecting...")
     return redirect(url_for('show_entries'))
